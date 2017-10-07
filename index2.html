@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.min.js"></script>
+    <title>DC Bike Share Scatter Plot - Responsive</title>
+    <style>
+      
+      
+      
+      /* scatterplot container - 
+      Use CSS to make it fille the page */
+      #viz1 {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom:0px;
+      }
+      
+      body {
+        margin: 0px;
+      }
+      .domain {
+        display: none;
+      }
+      .tick line {
+        stroke: #C0C0BB;
+      }
+      .tick text, .legendCells text {
+        fill: #8E8883;
+        font-size: 8pt;
+        font-family: sans-serif;
+      }
+      .axis-label, .legend-label {
+        fill: #635F5D;
+        font-size: 12pt;
+        font-family: sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="viz1">
+    </div>
+        
+    <script>
+      
+      var viz1Div = document.getElementById("viz1")
+      const svg = d3.select('viz1Div').append('svg');
+      
+      
+        const margin = { left: 120, right: 300, top: 20, bottom: 120 };
+
+        
+            
+        //set x and y values
+        const xValue = d => d.atemp;
+        const yValue = d => d.cnt;
+        
+        //set axis labels
+        const xLabel = 'Temperature';
+        const yLabel = 'Users';
+      
+        
+
+        //transform data from csv file
+        const row = d => {
+          d.instant = +d.instant;
+          //d.dteday = +d.dteday; //need to parse date
+          d.season = +d.season;
+          d.yr = +d.yr;
+          d.mnth = +d.mnth;
+          d.holiday = +d.holiday; //flag
+          d.weekday = +d.weekday; //integer day of week (0-6)
+          d.workingday = +d.workingday; //flag
+          d.weathersit = +d.weathersit; //(1-4)
+          d.temp = +d.temp;
+          d.temp = +d.atemp;
+          d.hum = +d.hum;
+          d.windspeed = +d.windspeed;
+          d.casual = +d.casual;
+          d.registered = +d.registered;
+          d.cnt = +d.cnt;
+          return d;
+        };
+
+        //load csv and draw scatter plot
+        d3.csv("day.csv", row, data => {
+                    
+          const redraw = () =>{
+            
+            //get window width and height computed by CCS
+            var width = svg.clientWidth;
+            var height = svg.clientHeight;
+        
+        
+            //set svg size to width of scatterPlot
+            svg
+              .attr('height', height)
+              .attr('width', width);
+           
+            render
+          };
+          
+          const render = () =>{
+            
+            var innerWidth = width - margin.left - margin.right;
+            var innerHeight = height - margin.top - margin.bottom;
+          
+            var g = svg.append('g')
+              .attr('transform', `translate(${margin.left},${margin.top})`);
+     
+            var xAxisG = g.append('g')
+              .attr('transform', `translate(0, ${innerHeight})`);
+            
+            var yAxisG = g.append('g');
+            
+            var colorLegendG = g.append('g')
+              .attr('transform', `translate(${innerWidth + 60}, 150)`);
+            
+            console.log(innerHeight);
+
+            xAxisG.append('text')
+            .attr('class', 'axis-label')
+            .attr('x', innerWidth / 2)
+            .attr('y', 75)
+            .text(xLabel);
+
+            yAxisG.append('text')
+            .attr('class', 'axis-label')
+            .attr('x', -innerHeight / 2)
+            .attr('y', -60)
+            .attr('transform', `rotate(-90)`)
+            .style('text-anchor', 'middle')
+            .text(yLabel);
+
+            //create x and y scales
+            const xScale = d3.scaleLinear();
+            const yScale = d3.scaleLinear();
+      
+            const xAxis = d3.axisBottom()
+            .scale(xScale)
+            .tickPadding(15)
+            .tickFormat(d3.format('0'))
+            .tickSize(-innerHeight);
+
+            const yAxis = d3.axisLeft()
+            .scale(yScale)
+            .ticks(5)
+            .tickPadding(15)
+            .tickSize(-innerWidth);   
+          
+            xScale
+            .domain(d3.extent(data, xValue))
+            .range([0, innerWidth])
+            .nice();
+
+            yScale
+            .domain(d3.extent(data, yValue))
+            .range([innerHeight, 0])
+            .nice();
+
+            g.selectAll('circle').data(data)
+             .enter().append('circle')
+              .attr('cx', d => xScale(xValue(d)))
+              .attr('cy', d => yScale(yValue(d)))
+              .attr('fill', "green")
+              .attr('fill-opacity', .2)
+              .attr('r', 5);
+
+            xAxisG.call(xAxis);
+            yAxisG.call(yAxis);
+          //colorLegendG.call(colorLegend)
+          //  .selectAll('.cell text')
+          //    .attr('dy', '0.1em');
+        
+          };
+      
+       //draw once to initialize
+       redraw();
+      
+       //redraw when browser window resized
+       window.addEventListener("resize", redraw); 
+       });
+      
+     
+      
+    </script>
+  </body>
+</html>
