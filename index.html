@@ -28,9 +28,6 @@
         fill: #635F5D;
         font-size: 12pt;
         font-family: sans-serif;
-      
-
-      
       }
 
       /* scatterplot container - 
@@ -52,19 +49,16 @@
     <script>
 
       var viz1Div = document.getElementById("viz1");
-      const svg = d3.select('viz1Div').append('svg');
-
+      var svg = d3.select(viz1Div).append('svg');
       const xValue = d => d.atemp;
       const xLabel = 'Temperature';
       const yValue = d => d.cnt;
       const yLabel = 'Users';
      
-      //const svg = d3.select('svg');
-  
       
       const row = d => {
         d.instant = +d.instant;
-        //d.dteday = +d.dteday; //need to parse date
+        d.dteday = new Date(d.dteday); //need to parse date
         d.season = +d.season;
         d.yr = +d.yr;
         d.mnth = +d.mnth;
@@ -84,28 +78,28 @@
 
       d3.csv("data/day.csv", row, data => {
         
-        const render = () => {
+        function render(){
         
          //get window width and height computed by CCS
-          var width =  viz1Div.clientWidth;
+          var width = viz1Div.clientWidth;
           var height = viz1Div.clientHeight;
 
-          console.log(width, height)
+          console.log(width, height);
         
         
-          const margin = { left: 120, right: 300, top: 20, bottom: 120 };
+          const margin = { left: 120, right: 120, top: 20, bottom: 90 };
           //const width = svg.attr('width');
           //const height = svg.attr('height');
-          const innerHeight = height - margin.top - margin.bottom;
-          const innerWidth = width - margin.left - margin.right;
+          var innerHeight = height - margin.top - margin.bottom;
+          var innerWidth = width - margin.left - margin.right;
   
-          const g = svg.append('g')
+          var g = svg.append('g')
              .attr('transform', `translate(${margin.left},${margin.top})`);
-          const xAxisG = g.append('g')
+          var xAxisG = svg.append('g')
              .attr('transform', `translate(0, ${innerHeight})`);
-          const yAxisG = g.append('g');
-          const colorLegendG = g.append('g')
-            .attr('transform', `translate(${innerWidth + 60}, 150)`);
+          var yAxisG = svg.append('g');
+          //const colorLegendG = svg.append('g')
+          //  .attr('transform', `translate(${innerWidth + 60}, 150)`);
 
 
           console.log(innerWidth, innerHeight, margin)
@@ -130,15 +124,15 @@
             .text(yLabel);
 
           const xScale = d3.scaleLinear();
-          const yScale = d3.scaleLinear();
+          const yScale = d3.scaleLinear();    
       
-          const xAxis = d3.axisBottom()
+          var xAxis = d3.axisBottom()
             .scale(xScale)
             .tickPadding(15)
             .tickFormat(d3.format('0'))
             .tickSize(-innerHeight);
 
-          const yAxis = d3.axisLeft()
+          var yAxis = d3.axisLeft()
            .scale(yScale)
            .ticks(5)
            .tickPadding(15)
@@ -154,13 +148,27 @@
             .range([innerHeight, 0])
             .nice();
 
-          g.selectAll('circle').data(data)
-            .enter().append('circle')
+          console.log(xScale(.5))
+          console.log(yScale(500))
+              
+          console.log("join data")
+          //data join
+          const circles = g.selectAll('circle').data(data);
+
+          //Add new elements
+          const circlesEnter = circles.enter().append('circle');
+
+          console.log("merge")
+          //merge existing and new elements
+          circlesEnter
+            .merge(circles)
               .attr('cx', d => xScale(xValue(d)))
               .attr('cy', d => yScale(yValue(d)))
               .attr('fill', "green")
               .attr('fill-opacity', .2)
               .attr('r', 5);
+          //remove elements for which there is no data
+          circles.exit().remove()
 
           xAxisG.call(xAxis);
           yAxisG.call(yAxis);
@@ -170,7 +178,9 @@
 
         };
 
-        render()
+        console.log("now render")
+
+        render();
 
               });
     </script>
