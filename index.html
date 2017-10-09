@@ -82,7 +82,7 @@
           const width = viz1Div.clientWidth;
           const height = viz1Div.clientHeight;
 
-          
+        
           // maintain  1:1 aspect ratio for  plot
           const minDimension = d3.min([width, height]);
 
@@ -94,9 +94,8 @@
           console.log(width, height, minDimension);
           console.log(svg.attr('width'), svg.attr('height'));
         
-        // maintain  1:1 aspect ratio for  plot
-        // 
-        
+          //keep top/right and left/bottom margins equal 
+          //to maintain  1:1 aspect ratio for  plot
           const margin = { left: 120, right: 60, top: 60, bottom: 120 };
       
           const innerHeight = height - margin.top - margin.bottom;
