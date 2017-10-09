@@ -98,8 +98,8 @@
           //to maintain  1:1 aspect ratio for  plot
           const margin = { left: 120, right: 60, top: 60, bottom: 120 };
       
-          const innerHeight = height - margin.top - margin.bottom;
-          const innerWidth = width - margin.left - margin.right;
+          const innerHeight = minDimension - margin.top - margin.bottom;
+          const innerWidth = minDimension - margin.left - margin.right;
   
           const g = svg.append('g')
              .attr('transform', `translate(${margin.left},${margin.top})`);
@@ -169,16 +169,14 @@
             console.log(yScale(0), yScale(3410))
              
             //data join
-            var circles = g.selectAll('circle').data(data, function(d) {return d;});
+            var circles = g.selectAll('circle').data(data);
 
             //Add new elements
-            const circlesEnter = circles.enter().append('circle');
+            var circlesEnter = circles.enter().append('circle');
 
-            //circles.exit().selectAll('circle').remove()
+            var circlesExit = circles.exit().remove()
 
-            
-            // 
-            
+            //merge new and existing ell
             circlesEnter
              .merge(circles)
               .attr('cx', d => xScale(xValue(d)))
@@ -189,7 +187,7 @@
 
   
            //remove elements for which there is no data
-           circles.exit().remove();
+           circlesExit
 
             xAxisG.call(xAxis);
             yAxisG.call(yAxis);
