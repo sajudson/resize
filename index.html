@@ -77,26 +77,27 @@
       };
 
       function render() {
-        
          //d3.select("svg").remove();
          //get window width and height computed by CCS
           const width = viz1Div.clientWidth;
-          var height = viz1Div.clientHeight;
+          const height = viz1Div.clientHeight;
 
-          var minDimension = d3.min([width, height]);
+          
+          // maintain  1:1 aspect ratio for  plot
+          const minDimension = d3.min([width, height]);
 
           //set svg size to window 
           svg
-            .attr('width',width)
-            .attr('height',height);
+            .attr('width',minDimension)
+            .attr('height',minDimension);
 
           console.log(width, height, minDimension);
           console.log(svg.attr('width'), svg.attr('height'));
         
-        // 1:1 aspect ratio for scatter plot
+        // maintain  1:1 aspect ratio for  plot
         // 
         
-          const margin = { left: 120, right: 60, top: 60, bottom: 100 };
+          const margin = { left: 120, right: 60, top: 60, bottom: 120 };
       
           const innerHeight = height - margin.top - margin.bottom;
           const innerWidth = width - margin.left - margin.right;
