@@ -8,7 +8,13 @@
     <title>DC Bike Share Test Chart</title>
     <style>
       
-
+        #viz1 {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom:0px;
+      }
 
       body {
         margin: 0px;
@@ -26,36 +32,30 @@
       }
       .axis-label, .legend-label {
         fill: #635F5D;
-        font-size: 12pt;
+        font-size: 10pt;
         font-family: sans-serif;
       }
 
-      /* scatterplot container - 
-      Use CSS to make it fille the page */
-      #viz1 {
-        position: fixed;
-        left: 0px;
-        right: 0px;
-        top: 0px;
-        bottom:0px;
-      }
+      
 
     </style>
   </head>
   <body>
-     <div id="viz1">
-        </div>
+     <div id="viz1"></div>
 
     <script>
 
       var viz1Div = document.getElementById("viz1");
       var svg = d3.select(viz1Div).append('svg');
-      const xValue = d => d.atemp;
+      
+      //set x and y value pointers and axis labels
+      const xValue = d => d.temp;
       const xLabel = 'Temperature';
-      const yValue = d => d.cnt;
+      const yValue = d => d.casual;
+      const yValue2 = d => d.registered;
       const yLabel = 'Users';
      
-      
+      //row function to parse csv
       const row = d => {
         d.instant = +d.instant;
         d.dteday = new Date(d.dteday); //need to parse date
@@ -76,113 +76,139 @@
         return d;
       };
 
-      d3.csv("data/day.csv", row, data => {
+      function render() {
         
-        function render(){
-        
+         //d3.select("svg").remove();
          //get window width and height computed by CCS
-          var width = viz1Div.clientWidth;
+          const width = viz1Div.clientWidth;
           var height = viz1Div.clientHeight;
 
-          console.log(width, height);
+          var minDimension = d3.min([width, height]);
+
+          //set svg size to window 
+          svg
+            .attr('width',width)
+            .attr('height',height);
+
+          console.log(width, height, minDimension);
+          console.log(svg.attr('width'), svg.attr('height'));
         
+        // 1:1 aspect ratio for scatter plot
+        // 
         
-          const margin = { left: 120, right: 120, top: 20, bottom: 90 };
-          //const width = svg.attr('width');
-          //const height = svg.attr('height');
-          var innerHeight = height - margin.top - margin.bottom;
-          var innerWidth = width - margin.left - margin.right;
+          const margin = { left: 120, right: 60, top: 60, bottom: 100 };
+      
+          const innerHeight = height - margin.top - margin.bottom;
+          const innerWidth = width - margin.left - margin.right;
   
-          var g = svg.append('g')
+          const g = svg.append('g')
              .attr('transform', `translate(${margin.left},${margin.top})`);
-          var xAxisG = svg.append('g')
+          const xAxisG = g.append('g')
              .attr('transform', `translate(0, ${innerHeight})`);
-          var yAxisG = svg.append('g');
-          //const colorLegendG = svg.append('g')
-          //  .attr('transform', `translate(${innerWidth + 60}, 150)`);
+          const yAxisG = g.append('g');
 
 
-          console.log(innerWidth, innerHeight, margin)
-
-          //console.log()
-
+          console.log(innerWidth, innerHeight, margin);
+          
         
-
      
           xAxisG.append('text')
             .attr('class', 'axis-label')
             .attr('x', innerWidth / 2)
-            .attr('y', 75)
+            .attr('y', 60)
             .text(xLabel);
 
          yAxisG.append('text')
             .attr('class', 'axis-label')
             .attr('x', -innerHeight / 2)
-            .attr('y', -60)
+            .attr('y',  -60)
             .attr('transform', `rotate(-90)`)
             .style('text-anchor', 'middle')
             .text(yLabel);
 
-          const xScale = d3.scaleLinear();
-          const yScale = d3.scaleLinear();    
-      
-          var xAxis = d3.axisBottom()
-            .scale(xScale)
-            .tickPadding(15)
-            .tickFormat(d3.format('0'))
-            .tickSize(-innerHeight);
 
-          var yAxis = d3.axisLeft()
-           .scale(yScale)
-           .ticks(5)
-           .tickPadding(15)
-           .tickSize(-innerWidth);
+          
 
-          xScale
-            .domain(d3.extent(data, xValue))
-            .range([0, innerWidth])
-            .nice();
+          console.log("join data");
+          
 
-          yScale
-            .domain(d3.extent(data, yValue))
-            .range([innerHeight, 0])
-            .nice();
+          d3.csv("data/day.csv", row, data => {
+        
+            const xScale = d3.scaleLinear();
+            const yScale = d3.scaleLinear();    
+            
+            xScale
+             .domain(d3.extent(data, xValue))
+             .range([0, innerWidth])
+             .nice();
 
-          console.log(xScale(.5))
-          console.log(yScale(500))
+            yScale
+             .domain(d3.extent(data, yValue))
+             .range([innerHeight, 0])
+             .nice();
+ 
+            const xAxis = d3.axisBottom()
+             .scale(xScale)
+             .tickPadding(10)
+             .tickFormat(d3.format('0'))
+             .tickSize(-innerHeight);
+
+            const yAxis = d3.axisLeft()
+             .scale(yScale)
+             .ticks(5)
+             .tickPadding(10)
+             .tickSize(-innerWidth); 
+           
+
               
-          console.log("join data")
-          //data join
-          const circles = g.selectAll('circle').data(data);
 
-          //Add new elements
-          const circlesEnter = circles.enter().append('circle');
+            console.log(d3.extent(data, yValue));
+            console.log(d3.extent(data, yValue2));
 
-          console.log("merge")
-          //merge existing and new elements
-          circlesEnter
-            .merge(circles)
+            console.log(xScale(0), xScale(1))
+            console.log(yScale(0), yScale(3410))
+             
+            //data join
+            var circles = g.selectAll('circle').data(data, function(d) {return d;});
+
+            //Add new elements
+            const circlesEnter = circles.enter().append('circle');
+
+            circles.exit().selectAll('circle').remove()
+
+            
+            // 
+            
+            circlesEnter
+             .merge(circles)
               .attr('cx', d => xScale(xValue(d)))
               .attr('cy', d => yScale(yValue(d)))
               .attr('fill', "green")
               .attr('fill-opacity', .2)
               .attr('r', 5);
-          //remove elements for which there is no data
-          circles.exit().remove()
 
-          xAxisG.call(xAxis);
-          yAxisG.call(yAxis);
+  
+           //remove elements for which there is no data
+           circles.exit().remove();
+
+            xAxisG.call(xAxis);
+            yAxisG.call(yAxis);
           //colorLegendG.call(colorLegend)
           //  .selectAll('.cell text')
           //    .attr('dy', '0.1em');
 
-        };
+        });
+      };
 
-        console.log("now render")
+    console.log("now render");
 
-        render();
+    render();
 
-              });
+    console.log("resized and rendered...");
+
+    window.addEventListener("resize",render);
+
+      
     </script>
   </body>
 </html>
