@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.min.js"></script>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width'>
+    <script src='https://d3js.org/d3.v4.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.min.js'></script>
     <title>DC Bike Share Test Chart</title>
     <style>
       
@@ -41,43 +41,45 @@
     </style>
   </head>
   <body>
-     <div id="viz1"></div>
+     <div id='viz1'></div>
 
     <script>
 
-      var viz1Div = document.getElementById("viz1");
+      var viz1Div = document.getElementById('viz1');
       var svg = d3.select(viz1Div).append('svg');
       
-      //set x and y value pointers and axis labels
-      const xValue = d => d.temp;
-      const xLabel = 'Temperature';
-      const yValue = d => d.casual;
-      const yValue2 = d => d.registered;
-      const yLabel = 'Users';
-     
-      //row function to parse csv
-      const row = d => {
-        d.instant = +d.instant;
-        d.dteday = new Date(d.dteday); //need to parse date
-        d.season = +d.season;
-        d.yr = +d.yr;
-        d.mnth = +d.mnth;
-        d.holiday = +d.holiday; //flag
-        d.weekday = +d.weekday; //integer day of week (0-6)
-        d.workingday = +d.workingday; //flag
-        d.weathersit = +d.weathersit; //(1-4)
-        d.temp = +d.temp;
-        d.atemp = +d.atemp;
-        d.hum = +d.hum;
-        d.windspeed = +d.windspeed;
-        d.casual = +d.casual;
-        d.registered = +d.registered;
-        d.cnt = +d.cnt;
-        return d;
-      };
+      
 
       function render() {
-         //d3.select("svg").remove();
+         //set x and y value pointers and axis labels
+         const xValue = d => d.temp;
+         const xLabel = 'Temperature';
+         const yValue = d => d.casual;
+         const yValue2 = d => d.registered;
+         const yLabel = 'Users';
+     
+         //row function to parse csv
+        const row = d => {
+          d.instant = +d.instant;
+          d.dteday = new Date(d.dteday); //need to parse date
+          d.season = +d.season;
+          d.yr = +d.yr;
+          d.mnth = +d.mnth;
+          d.holiday = +d.holiday; //flag
+          d.weekday = +d.weekday; //integer day of week (0-6)
+          d.workingday = +d.workingday; //flag
+          d.weathersit = +d.weathersit; //(1-4)
+          d.temp = +d.temp;
+          d.atemp = +d.atemp;
+          d.hum = +d.hum;
+          d.windspeed = +d.windspeed;
+          d.casual = +d.casual;
+          d.registered = +d.registered;
+          d.cnt = +d.cnt;
+          return d;
+        };
+
+      //d3.select('svg').remove();
          //get window width and height computed by CCS
           const width = viz1Div.clientWidth;
           const height = viz1Div.clientHeight;
@@ -125,14 +127,12 @@
             .attr('transform', `rotate(-90)`)
             .style('text-anchor', 'middle')
             .text(yLabel);
-
-
           
 
-          console.log("join data");
+          console.log('join data');
           
 
-          d3.csv("data/day.csv", row, data => {
+          d3.csv('data/day.csv', row, data => {
         
             const xScale = d3.scaleLinear();
             const yScale = d3.scaleLinear();    
@@ -173,17 +173,25 @@
 
             //Add new elements
             var circlesEnter = circles.enter().append('circle');
+            var t = d3.transition().duration(500)
 
-            var circlesExit = circles.exit().remove()
+            var circlesExit = circles.exit()
+                                  .attr('class','exit')
+                                 .remove();
+
+            //UPDATE old elements present (change class)
+            circles
+             .attr('class','update')
 
             //merge new and existing ell
             circlesEnter
+               .attr('class','enter')
+               .attr('fill', 'green')
+               .attr('fill-opacity', .2)
+               .attr('r', 5)
              .merge(circles)
               .attr('cx', d => xScale(xValue(d)))
-              .attr('cy', d => yScale(yValue(d)))
-              .attr('fill', "green")
-              .attr('fill-opacity', .2)
-              .attr('r', 5);
+              .attr('cy', d => yScale(yValue(d)));
 
   
            //remove elements for which there is no data
@@ -198,13 +206,13 @@
         });
       };
 
-    console.log("now render");
+    console.log('now render');
 
     render();
 
-    console.log("resized and rendered...");
+    console.log('resized and rendered...');
 
-    window.addEventListener("resize",render);
+    window.addEventListener('resize',render);
 
       
     </script>
