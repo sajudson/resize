@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width'>
     <script src='https://d3js.org/d3.v4.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.min.js'></script>
+
     <title>DC Bike Share Test Chart</title>
     <style>
       
@@ -41,25 +42,31 @@
     </style>
   </head>
   <body>
-     <div id='viz1'></div>
+  
+    <div id="viz1"></div> 
 
     <script>
 
       var viz1Div = document.getElementById('viz1');
-      var svg = d3.select(viz1Div).append('svg');
-      
-      
+      var svg = d3.select(viz1Div)
+                .selectAll('svg')
+                .data([null]);
 
-      function render() {
-         //set x and y value pointers and axis labels
-         const xValue = d => d.temp;
-         const xLabel = 'Temperature';
-         const yValue = d => d.casual;
-         const yValue2 = d => d.registered;
-         const yLabel = 'Users';
+      var svgEnter = svg
+        .enter()
+        .append('svg');
+
+      //set x and y value pointers and axis labels
+      const xValue = d => d.temp;
+      const xLabel = 'Temperature';
+      const yValue = d => d.casual;
+      const yValue2 = d => d.registered;
+      const yLabel = 'Users';
      
-         //row function to parse csv
-        const row = d => {
+      const margin = { left: 120, right: 60, top: 60, bottom: 120 };
+      
+      //row function to parse csv
+      const row = d => {
           d.instant = +d.instant;
           d.dteday = new Date(d.dteday); //need to parse date
           d.season = +d.season;
@@ -77,50 +84,42 @@
           d.registered = +d.registered;
           d.cnt = +d.cnt;
           return d;
-        };
-
-      //d3.select('svg').remove();
-         //get window width and height computed by CCS
-          const width = viz1Div.clientWidth;
-          const height = viz1Div.clientHeight;
-
-        
-          // maintain  1:1 aspect ratio for  plot
-          const minDimension = d3.min([width, height]);
-
-          //set svg size to window 
-          svg
-            .attr('width',minDimension)
-            .attr('height',minDimension);
-
-          console.log(width, height, minDimension);
-          console.log(svg.attr('width'), svg.attr('height'));
-        
-          //keep top/right and left/bottom margins equal 
-          //to maintain  1:1 aspect ratio for  plot
-          const margin = { left: 120, right: 60, top: 60, bottom: 120 };
+      };
       
-          const innerHeight = minDimension - margin.top - margin.bottom;
-          const innerWidth = minDimension - margin.left - margin.right;
-  
-          const g = svg.append('g')
-             .attr('transform', `translate(${margin.left},${margin.top})`);
-          const xAxisG = g.append('g')
+
+      function scatterPlot(svg, data, xValue, yValue, width, height, margin) {
+        // maintain  1:1 aspect ratio for  plot
+        const minDimension = d3.min([width, height]);
+        //set svg size to window 
+        svg = svgEnter
+          .merge(svg)
+          .attr('width',minDimension)
+          .attr('height',minDimension);
+
+        console.log(width, height, minDimension);
+        console.log(svg.attr('width'), svg.attr('height'));
+    
+        const innerHeight = minDimension - margin.top - margin.bottom;
+      
+        var g = svg.selectAll('g').data([null]);
+
+        g = g.enter().append('g')
+          .merge(g)
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        const xAxisG = g.append('g')
              .attr('transform', `translate(0, ${innerHeight})`);
-          const yAxisG = g.append('g');
-
-
-          console.log(innerWidth, innerHeight, margin);
-          
+        const yAxisG = g.append('g');
         
-     
-          xAxisG.append('text')
+        console.log(innerWidth, innerHeight, margin);
+        
+        xAxisG.append('text')
             .attr('class', 'axis-label')
             .attr('x', innerWidth / 2)
             .attr('y', 60)
             .text(xLabel);
 
-         yAxisG.append('text')
+        yAxisG.append('text')
             .attr('class', 'axis-label')
             .attr('x', -innerHeight / 2)
             .attr('y',  -60)
@@ -129,91 +128,100 @@
             .text(yLabel);
           
 
-          console.log('join data');
-          
-
-          d3.csv('data/day.csv', row, data => {
-        
-            const xScale = d3.scaleLinear();
-            const yScale = d3.scaleLinear();    
+        const xScale = d3.scaleLinear();
+        const yScale = d3.scaleLinear();    
             
-            xScale
-             .domain(d3.extent(data, xValue))
-             .range([0, innerWidth])
-             .nice();
+        xScale
+          .domain(d3.extent(data, xValue))
+          .range([0, innerWidth])
+          .nice();
 
-            yScale
+        yScale
              .domain(d3.extent(data, yValue))
              .range([innerHeight, 0])
              .nice();
  
-            const xAxis = d3.axisBottom()
+        const xAxis = d3.axisBottom()
              .scale(xScale)
              .tickPadding(10)
              .tickFormat(d3.format('0'))
              .tickSize(-innerHeight);
 
-            const yAxis = d3.axisLeft()
+        const yAxis = d3.axisLeft()
              .scale(yScale)
              .ticks(5)
              .tickPadding(10)
              .tickSize(-innerWidth); 
-           
-
-              
-
-            console.log(d3.extent(data, yValue));
-            console.log(d3.extent(data, yValue2));
-
-            console.log(xScale(0), xScale(1))
-            console.log(yScale(0), yScale(3410))
+        
+        //log domain of yValues
+        console.log(d3.extent(data, yValue));
+        
+        //log exoected max values of x and y scale
+        console.log(xScale(0), xScale(1))
+        console.log(yScale(0), yScale(3410))
              
-            //data join
-            var circles = g.selectAll('circle').data(data);
+        //data join
+        var circles = g.selectAll('circle').data(data);
 
-            //Add new elements
-            var circlesEnter = circles.enter().append('circle');
-            var t = d3.transition().duration(500)
+        //Add new elements
+        var circlesEnter = circles.enter().append('circle');
+        var t = d3.transition().duration(500);
 
-            var circlesExit = circles.exit()
-                                  .attr('class','exit')
-                                 .remove();
+        var circlesExit = circles.exit()
+            .attr('class','exit')
+            .remove();
 
-            //UPDATE old elements present (change class)
-            circles
-             .attr('class','update')
+        //UPDATE old elements present (change class)
+        circles
+          .attr('class','update')
 
-            //merge new and existing ell
-            circlesEnter
-               .attr('class','enter')
-               .attr('fill', 'green')
-               .attr('fill-opacity', .2)
-               .attr('r', 5)
-             .merge(circles)
-              .attr('cx', d => xScale(xValue(d)))
-              .attr('cy', d => yScale(yValue(d)));
+        //merge new and existing ell
+        circlesEnter
+          .attr('class','enter')
+          .attr('fill', 'green')
+          .attr('fill-opacity', .2)
+          .attr('r', 5)
+         .merge(circles)
+          .attr('cx', d => xScale(xValue(d)))
+          .attr('cy', d => yScale(yValue(d)));
+        
+        //remove elements for which there is no data
+          circlesExit
 
-  
-           //remove elements for which there is no data
-           circlesExit
-
-            xAxisG.call(xAxis);
-            yAxisG.call(yAxis);
+        //call X and Y axis
+        xAxisG.call(xAxis);
+        yAxisG.call(yAxis);
           //colorLegendG.call(colorLegend)
           //  .selectAll('.cell text')
           //    .attr('dy', '0.1em');
 
-        });
-      };
+      
+    };  
 
-    console.log('now render');
+    console.log('join data');
+          
 
-    render();
+    d3.csv('data/day.csv', row, data => {
+        
+        const render =() => {
+          //get window width and height computed by CCS
+          const width = viz1Div.clientWidth;
+          const height = viz1Div.clientHeight;
 
-    console.log('resized and rendered...');
+          scatterPlot(svg, data, xValue, yValue, width, height, margin);
+        }
+          
+        console.log('now render');
 
-    window.addEventListener('resize',render);
+        render();
 
+        console.log('resized and rendered...');
+
+        window.addEventListener('resize',render);
+        
+    });
+
+    
       
     </script>
   </body>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width'>
+    <script src='https://d3js.org/d3.v4.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.min.js'></script>
+
+
+    <!-- load jQuery and popper for bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <title>DC Bike Share Test Chart</title>
+    <style>
+      
+        #viz1 {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom:0px;
+      }
+
+      body {
+        margin: 0px;
+      }
+      .domain {
+        display: none;
+      }
+      .tick line {
+        stroke: #C0C0BB;
+      }
+      .tick text, .legendCells text {
+        fill: #8E8883;
+        font-size: 8pt;
+        font-family: sans-serif;
+      }
+      .axis-label, .legend-label {
+        fill: #635F5D;
+        font-size: 10pt;
+        font-family: sans-serif;
+      }
+
+      
+
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      
+      <div class="row" id='nav'>Navigation Bar</div>
+
+      <div class="row" id='row1'>
+        <div class="col-md-3" id="viz1">1-1</div> 
+        <div class="col-md-3" id="r1c2">1-2</div> 
+        <div class="col-md-3" id="r1c3">1-3</div> 
+        <div class="col-md-3" id="r1c4">1-4</div> 
+      </div> 
+
+      <div class="row" id='row2'>
+        <div class="col-md-3" id="r2c1">1-1</div> 
+        <div class="col-md-3" id="r2c2">1-2</div> 
+        <div class="col-md-3" id="r2c3">1-3</div> 
+        <div class="col-md-3" id="r2c4">1-4</div> 
+      </div> 
+
+      <div class="row" id='row1'>
+        <div class="col-md-12" id="r3c1">Overview</div>
+      </div> 
+     
+
+    
+    </div>
+
+    <script>
+
+      var viz1Div = document.getElementById('viz1');
+      var svg = d3.select(viz1Div)
+                .selectAll('svg')
+                .data([null]);
+
+      var svgEnter = svg
+        .enter()
+        .append('svg');
+
+
+      
+
+      function render() {
+         //set x and y value pointers and axis labels
+         const xValue = d => d.temp;
+         const xLabel = 'Temperature';
+         const yValue = d => d.casual;
+         const yValue2 = d => d.registered;
+         const yLabel = 'Users';
+     
+         //row function to parse csv
+        const row = d => {
+          d.instant = +d.instant;
+          d.dteday = new Date(d.dteday); //need to parse date
+          d.season = +d.season;
+          d.yr = +d.yr;
+          d.mnth = +d.mnth;
+          d.holiday = +d.holiday; //flag
+          d.weekday = +d.weekday; //integer day of week (0-6)
+          d.workingday = +d.workingday; //flag
+          d.weathersit = +d.weathersit; //(1-4)
+          d.temp = +d.temp;
+          d.atemp = +d.atemp;
+          d.hum = +d.hum;
+          d.windspeed = +d.windspeed;
+          d.casual = +d.casual;
+          d.registered = +d.registered;
+          d.cnt = +d.cnt;
+          return d;
+        };
+
+      //d3.select('svg').remove();
+         //get window width and height computed by CCS
+          const width = viz1Div.clientWidth;
+          const height = viz1Div.clientHeight;
+
+        
+          // maintain  1:1 aspect ratio for  plot
+          const minDimension = d3.min([width, height]);
+
+          //set svg size to window 
+          svg = svgEnter
+                .merge(svg)
+                  .attr('width',minDimension)
+                  .attr('height',minDimension);
+
+          console.log(width, height, minDimension);
+          console.log(svg.attr('width'), svg.attr('height'));
+        
+          //keep top/right and left/bottom margins equal 
+          //to maintain  1:1 aspect ratio for  plot
+          const margin = { left: 120, right: 60, top: 60, bottom: 120 };
+      
+          const innerHeight = minDimension - margin.top - margin.bottom;
+          const innerWidth = minDimension - margin.left - margin.right;
+  
+          var g = svgEnter
+                      .append('g')
+                      .merge(svg.select('g'))
+                        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+
+          const xAxisG = g.append('g')
+             .attr('transform', `translate(0, ${innerHeight})`);
+          const yAxisG = g.append('g');
+
+
+          console.log(innerWidth, innerHeight, margin);
+          
+        
+     
+          xAxisG.append('text')
+            .attr('class', 'axis-label')
+            .attr('x', innerWidth / 2)
+            .attr('y', 60)
+            .text(xLabel);
+
+         yAxisG.append('text')
+            .attr('class', 'axis-label')
+            .attr('x', -innerHeight / 2)
+            .attr('y',  -60)
+            .attr('transform', `rotate(-90)`)
+            .style('text-anchor', 'middle')
+            .text(yLabel);
+          
+
+          console.log('join data');
+          
+
+          d3.csv('data/day.csv', row, data => {
+        
+            const xScale = d3.scaleLinear();
+            const yScale = d3.scaleLinear();    
+            
+            xScale
+             .domain(d3.extent(data, xValue))
+             .range([0, innerWidth])
+             .nice();
+
+            yScale
+             .domain(d3.extent(data, yValue))
+             .range([innerHeight, 0])
+             .nice();
+ 
+            const xAxis = d3.axisBottom()
+             .scale(xScale)
+             .tickPadding(10)
+             .tickFormat(d3.format('0'))
+             .tickSize(-innerHeight);
+
+            const yAxis = d3.axisLeft()
+             .scale(yScale)
+             .ticks(5)
+             .tickPadding(10)
+             .tickSize(-innerWidth); 
+           
+
+              
+
+            console.log(d3.extent(data, yValue));
+            console.log(d3.extent(data, yValue2));
+
+            console.log(xScale(0), xScale(1))
+            console.log(yScale(0), yScale(3410))
+             
+            //data join
+            var circles = g.selectAll('circle').data(data);
+
+            //Add new elements
+            var circlesEnter = circles.enter().append('circle');
+            var t = d3.transition().duration(500)
+
+            var circlesExit = circles.exit()
+                                  .attr('class','exit')
+                                 .remove();
+
+            //UPDATE old elements present (change class)
+            circles
+             .attr('class','update')
+
+            //merge new and existing ell
+            circlesEnter
+               .attr('class','enter')
+               .attr('fill', 'green')
+               .attr('fill-opacity', .2)
+               .attr('r', 5)
+             .merge(circles)
+              .attr('cx', d => xScale(xValue(d)))
+              .attr('cy', d => yScale(yValue(d)));
+
+  
+           //remove elements for which there is no data
+           circlesExit
+
+            xAxisG.call(xAxis);
+            yAxisG.call(yAxis);
+          //colorLegendG.call(colorLegend)
+          //  .selectAll('.cell text')
+          //    .attr('dy', '0.1em');
+
+        });
+      };
+
+    console.log('now render');
+
+    render();
+
+    console.log('resized and rendered...');
+
+    window.addEventListener('resize',render);
+
+      
+    </script>
+  </body>
+</html>
