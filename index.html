@@ -102,33 +102,6 @@
         const innerHeight = minDimension - margin.top - margin.bottom;
         const innerWidth = minDimension - margin.left - margin.right;
       
-        var g = svg.selectAll('g').data([null]);
-
-        g = g.enter().append('g')
-          .merge(g)
-          .attr('transform', `translate(${margin.left},${margin.top})`);
-
-        const xAxisG = g.append('g')
-             .attr('transform', `translate(0, ${innerHeight})`);
-        const yAxisG = g.append('g');
-        
-        console.log(innerWidth, innerHeight, margin);
-        
-        xAxisG.append('text')
-            .attr('class', 'axis-label')
-            .attr('x', innerWidth / 2)
-            .attr('y', 60)
-            .text(xLabel);
-
-        yAxisG.append('text')
-            .attr('class', 'axis-label')
-            .attr('x', -innerHeight / 2)
-            .attr('y',  -60)
-            .attr('transform', `rotate(-90)`)
-            .style('text-anchor', 'middle')
-            .text(yLabel);
-          
-
         const xScale = d3.scaleLinear();
         const yScale = d3.scaleLinear();    
             
@@ -150,9 +123,51 @@
 
         const yAxis = d3.axisLeft()
              .scale(yScale)
-             .ticks(5)
              .tickPadding(10)
-             .tickSize(-innerWidth); 
+             .tickSize(-innerWidth);
+
+        var g = svg.selectAll('g').data([null]);
+
+        g = g.enter().append('g')
+          .merge(g)
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        var xAxisG = g.selectAll('#x-axis-g').data([null]);
+
+        xAxisG = xAxisG.enter().append('g').merge(xAxisG)
+          .attr('id','x-axis-g')
+          .attr('transform', `translate(0, ${innerHeight})`);
+
+        var yAxisG = g.selectAll('#y-axis-g').data([null]);
+        
+        yAxisG = yAxisG.enter().append('g').merge(yAxisG)
+          .attr('id','y-axis-g');
+        
+        
+        console.log(innerWidth, innerHeight, margin);
+        
+
+        var xAxisText = g.selectAll('#x-axis-label').data([null]);
+        xAxisText = xAxisText.enter().append('text').merge(xAxisText)
+            .attr('class', 'axis-label')
+            .attr('id', 'x-axis-label')
+            .attr('x', innerWidth / 2)
+            .attr('y', innerHeight+margin.bottom/2)
+            .style('text-anchor', 'middle')
+            .text(xLabel);
+
+        var yAxisText = g.selectAll('#y-axis-label').data([null]);
+        yAxisText = yAxisText.enter().append('text').merge(yAxisText)
+            .attr('class', 'axis-label')  
+            .attr('id', 'y-axis-label')
+            .attr('x', -innerHeight / 2)
+            .attr('y',  -margin.left/2)
+            .attr('transform', `rotate(-90)`)
+            .style('text-anchor', 'middle')
+            .text(yLabel);
+          
+
+         
         
         //log domain of yValues
         console.log(d3.extent(data, yValue));
