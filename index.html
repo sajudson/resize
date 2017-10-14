@@ -100,6 +100,7 @@
         console.log(svg.attr('width'), svg.attr('height'));
     
         const innerHeight = minDimension - margin.top - margin.bottom;
+        const innerWidth = minDimension - margin.left - margin.right;
       
         var g = svg.selectAll('g').data([null]);
 
