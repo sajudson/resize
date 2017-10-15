@@ -109,11 +109,14 @@
       const yValue2 = d => d.registered;
       const yLabel1 = 'Registered Users';
       const yLabel2 = 'Casual Users';
+      const yLabel3 = 'Registered Users';
       const pointSize = 2;
-     
+      const pointColor1 = "green";
+      const pointColor2 = "blue";
+
       const margin = { left: 90, right: 10, top: 10, bottom: 60 };
       
-      //row function to parse csv
+      //row function to parse daily csv
       const row = d => {
           d.instant = +d.instant;
           d.dteday = new Date(d.dteday); //need to parse date
@@ -134,9 +137,77 @@
           return d;
       };
       
-      pointColor1 = "green";
-      pointColor2 = "blue";
+      const dataDaily = null;
+      const dataHourly = null;
+      
+      const chartConfig = {
+        'chart1':{
+          'div':div1,
+          'data':dataDaily,
+          'xValue':"d.temp",
+          'yValue':'d.registered',
+          'xLabel':'Temperature',
+          'yLabel':'Registered Users',
+          'pointColor':"orange",
+          'margin':margin
+        },
+        'chart2':{
+          'div':div2,
+          'data':dataDaily,
+          'xValue':"d.hum",
+          'yValue':"d.registered",
+          'xLabel':'Humidity',
+          'yLabel':'Registered Users',
+          'pointColor':"orange",
+          'margin':margin
+        },
+        'chart3':{
+          'div':div3,
+          'data':dataDaily,
+          'xValue':'d.windspeed',
+          'yValue':'d.registered',
+          'xLabel':'Windspeed',
+          'yLabel':'Registered Users',
+          'pointColor':"orange",
+          'margin':margin
+        },
+        'chart5':{
+          'div':div5,
+          'data':dataDaily,
+          'xValue':'d.temp',
+          'yValue':'d.casual',
+          'xLabel':'Temperature',
+          'yLabel':'Casual Users',
+          'pointColor':"purple",
+          'margin':margin
+        },
+        'chart6':{
+          'div':div6,
+          'data':dataDaily,
+          'xValue':'d.hum',
+          'yValue':'d.casual',
+          'xLabel':'Humidity',
+          'yLabel':'Casual Users',
+          'pointColor':"purple",
+          'margin':margin
+        },
+        'chart7':{
+          'div':div7,
+          'data':dataDaily,
+          'xValue':'d.windspeed',
+          'yValue':'d.casual',
+          'xLabel':'Windspeed',
+          'yLabel':'Casual Users',
+          'pointColor':"purple",
+          'margin':margin
+        },
+      }
+      
 
+
+
+
+      
       function scatterPlot(div, data, xValue, yValue, xLabel, yLabel, pointColor, margin) {
         // maintain  1:1 aspect ratio for  plot
         
@@ -283,10 +354,13 @@
 
     d3.csv(datafile, row, data => {
         
+        const dataDaily = data;
+        const dataHourly = data;
+
         const render =() => {
           //get window width and height computed by CCS
           
-          
+          data = data.filter( d => d.year == 0)
 
           scatterPlot(div1, data, 
             xValue1, yValue1, xLabel1, yLabel1, 
