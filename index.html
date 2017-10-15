@@ -6,20 +6,38 @@
     <script src='https://d3js.org/d3.v4.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.min.js'></script>
 
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
     <title>DC Bike Share Test Chart</title>
     <style>
       
-        #viz1 {
-        position: fixed;
-        left: 0px;
-        right: 0px;
-        top: 0px;
-        bottom:0px;
-      }
+        
 
       body {
         margin: 0px;
       }
+      
+      .square {
+        display: inline-block;
+        position: relative;
+        height: 25vmin;
+        width: 25vmin;
+      .square {
+        display: inline-block;
+        position: relative;
+        height: 25vmin;
+        width: 100vmin;}
+
       .domain {
         display: none;
       }
@@ -42,28 +60,58 @@
     </style>
   </head>
   <body>
-  
-    <div id="viz1"></div> 
+
+  <div class='container-fluid'>
+    <div class='row'>
+      <div class ="col-md-3 column square" id="viz1"></div> 
+      <div class ="col-md-3 column square" id="viz2"></div> 
+      <div class ="col-md-3 column square" id="viz3"></div> 
+      <div class ="col-md-3 column square" id="viz4"></div> 
+    </div>
+    <div class='row'>
+      <div class ="col-md-3 column square" id="viz5"></div> 
+      <div class ="col-md-3 column square" id="viz6"></div> 
+      <div class ="col-md-3 column square" id="viz7"></div> 
+      <div class ="col-md-3 column square" id="viz8"></div> 
+    </div>
+    <div class='row'>
+      <div class ="col-md-12 column long" id="viz9"></div>
+    </div>
+  </div>
+
 
     <script>
 
-      var viz1Div = document.getElementById('viz1');
-      var svg = d3.select(viz1Div)
-                .selectAll('svg')
-                .data([null]);
+      const div1 = "viz1",
+      div2 = "viz2",
+      div3 = "viz3",
+      div4 = "viz4",
+      div5 = "viz5",
+      div6 = "viz6",
+      div7 = "viz7",
+      div8 = "viz8";
+      div9 = "viz9";
 
-      var svgEnter = svg
-        .enter()
-        .append('svg');
+      const localFile = 'data/day.csv'
+      const blocksFile = 'day.csv'
+      var datafile = localFile
+
 
       //set x and y value pointers and axis labels
-      const xValue = d => d.temp;
-      const xLabel = 'Temperature';
-      const yValue = d => d.casual;
+      const xValue1 = d => d.temp;
+      const xValue2 = d => d.hum;
+      const xValue3 = d => d.windspeed;
+      const xValue4 = d => d.dteday;
+      const xLabel1 = 'Temperature';
+      const xLabel2 = 'Humidity';
+      const xLabel3 = 'Windspeed';
+      const yValue1 = d => d.casual;
       const yValue2 = d => d.registered;
-      const yLabel = 'Users';
+      const yLabel1 = 'Registered Users';
+      const yLabel2 = 'Casual Users';
+      const pointSize = 2;
      
-      const margin = { left: 120, right: 60, top: 60, bottom: 120 };
+      const margin = { left: 90, right: 10, top: 10, bottom: 60 };
       
       //row function to parse csv
       const row = d => {
@@ -86,16 +134,32 @@
           return d;
       };
       
+      pointColor1 = "green";
+      pointColor2 = "blue";
 
-      function scatterPlot(svg, data, xValue, yValue, width, height, margin) {
+      function scatterPlot(div, data, xValue, yValue, xLabel, yLabel, pointColor, margin) {
         // maintain  1:1 aspect ratio for  plot
+        
+        var vizDiv = document.getElementById(div);
+        var svg = d3.select(vizDiv)
+                .selectAll('svg')
+                .data([null]);
+
+        const width = vizDiv.offsetWidth;
+        const height = vizDiv.offsetHeight;
         const minDimension = d3.min([width, height]);
+        
+
+        var svgEnter = svg
+         .enter()
+         .append('svg');
         //set svg size to window 
         svg = svgEnter
           .merge(svg)
           .attr('width',minDimension)
           .attr('height',minDimension);
 
+        
         console.log(width, height, minDimension);
         console.log(svg.attr('width'), svg.attr('height'));
     
@@ -194,9 +258,9 @@
         //merge new and existing ell
         circlesEnter
           .attr('class','enter')
-          .attr('fill', 'green')
+          .attr('fill', pointColor)
           .attr('fill-opacity', .2)
-          .attr('r', 5)
+          .attr('r', pointSize)
          .merge(circles)
           .attr('cx', d => xScale(xValue(d)))
           .attr('cy', d => yScale(yValue(d)));
@@ -217,14 +281,50 @@
     console.log('join data');
           
 
-    d3.csv('data/day.csv', row, data => {
+    d3.csv(datafile, row, data => {
         
         const render =() => {
           //get window width and height computed by CCS
-          const width = viz1Div.clientWidth;
-          const height = viz1Div.clientHeight;
+          
+          
 
-          scatterPlot(svg, data, xValue, yValue, width, height, margin);
+          scatterPlot(div1, data, 
+            xValue1, yValue1, xLabel1, yLabel1, 
+            pointColor1, margin);
+
+          scatterPlot(div2, data, 
+            xValue2, yValue1,  xLabel2, yLabel1,
+            pointColor1, margin);
+          
+          scatterPlot(div3, data, 
+            xValue3, yValue1,  xLabel3, yLabel1,
+            pointColor1, margin);
+          
+          scatterPlot(div4, data, 
+            xValue1, yValue1,  xLabel1, yLabel1,
+            pointColor1, margin);
+
+          scatterPlot(div5, data, 
+            xValue1, yValue2,  xLabel1, yLabel2,
+            pointColor2, margin);
+          
+          scatterPlot(div6, data, 
+            xValue2, yValue2,  xLabel2, yLabel2,
+            pointColor2, margin);
+          
+          scatterPlot(div7, data, 
+            xValue3, yValue2,  xLabel3, yLabel2,
+            pointColor2, margin);
+          
+          scatterPlot(div8, data, 
+             xValue1, yValue2,  xLabel1, yLabel2,
+             pointColor2, margin);
+          
+          scatterPlot(div9, data, 
+            xValue3, yValue1,  xLabel1, yLabel3,
+            "grey", margin);
+          ;
+
         }
           
         console.log('now render');
